@@ -20,16 +20,15 @@ ini_set('memory_limit', '64M');
  */
 class Caterpillar extends RollingCurl {
 
-	// CATERPILLAR VARS
 	protected $startUrl;        // the starting URL of the crawler
-    protected $domain;          // the domain path
+	protected $domain;          // the domain path
 	protected $ch;              // stores the curl handler
-    protected $db;              // stores the database connection
+	protected $db;              // stores the database connection
 	protected $maxDepth = 3;    // the maximum number of trailing forward slashes
-	protected $startTime;		// the timestamp that caterpillar started
+	protected $startTime;       // the timestamp that caterpillar started
 
-	protected $tempTable;					// the name of the temporary table
-	protected $page_cache = array();		// the page cache for batching counts
+	protected $tempTable;			// the name of the temporary table
+	protected $page_cache = array();	// the page cache for batching counts
 	protected $pagesRequested = array();	// handles checking for first page requests
 
     /**
@@ -45,8 +44,8 @@ class Caterpillar extends RollingCurl {
      */
     public function __construct($startUrl, $dbUser, $dbPass, $dbName, $dbHost)
     {
-		// register the Rolling Curl callback
-		parent::__construct('parseHtml');
+	// register the Rolling Curl callback
+	parent::__construct('parseHtml');
 
         // validate the url is valid HTTP or HTTPS
         if (strpos($startUrl, 'http://') === false &&
@@ -54,24 +53,24 @@ class Caterpillar extends RollingCurl {
             throw new Exception('Your starting caterpillar URL must begin with http or https.');
         }
 
-		// store the base url
-		$this->startUrl = rtrim($startUrl, '/') . '/';
+	// store the base url
+	$this->startUrl = rtrim($startUrl, '/') . '/';
 
-		// store the start time
-		$this->startTime = date('Y-m-d H:i:s');
+	// store the start time
+	$this->startTime = date('Y-m-d H:i:s');
 
         // store the base domain
         $info = parse_url($startUrl);
         $this->domain = $info['scheme'] . '://' . $info['host'];
 
-		// open mysql connection
-		$this->db = mysql_connect($dbHost, $dbUser, $dbPass);
+	// open mysql connection
+	$this->db = mysql_connect($dbHost, $dbUser, $dbPass);
         if ($this->db === false) {
             throw new Exception('The caterpillar database connection could not be established');
         }
 
-		// use user specified database
-		if (!mysql_select_db($dbName)) {
+	// use user specified database
+	if (!mysql_select_db($dbName)) {
             throw new Exception('An error occurred attempting to connect to the database ' . $dbName);
         }
 
@@ -86,7 +85,7 @@ class Caterpillar extends RollingCurl {
 	 */
 	public function crawl()
 	{
-        // truncate any non-existant pages
+        	// truncate any non-existant pages
 		$this->resetIndex();
 
 		// create a temporary table for incrementing counts
@@ -123,8 +122,10 @@ class Caterpillar extends RollingCurl {
 			} else {
 				$this->updateInboundCount($res, $html, $filesize);
 			}
+
 			return true;
 		}
+
 		return false;
 	}
 
@@ -150,6 +151,7 @@ class Caterpillar extends RollingCurl {
 				$this->page_cache = array();
 			}
 		}
+
 		// filesize hasnt changed
 		else if ($page['filesize'] == $filesize) {
 			$sql = sprintf('UPDATE crawl_index SET
@@ -159,6 +161,7 @@ class Caterpillar extends RollingCurl {
 							mysql_real_escape_string($this->startTime),
 							$page['id']);
 		}
+
 		// filesize has changed since last check
 		else {
 			$sql = sprintf('UPDATE crawl_index SET
@@ -173,6 +176,7 @@ class Caterpillar extends RollingCurl {
 							mysql_real_escape_string($this->startTime),
 							$page['id']);
 		}
+
 		return mysql_query($sql);
 	}
 
@@ -186,8 +190,9 @@ class Caterpillar extends RollingCurl {
 	protected function checkIfFirstRequest($link)
 	{
 		// simple cache to avoid db
-		if (isset($this->pagesRequested[$link]))
+		if (isset($this->pagesRequested[$link])) {
 			return $this->pagesRequested[$link];
+		}
 
 		// cache miss, need to check
 		$sql = sprintf('SELECT SQL_NO_CACHE id, last_tested FROM crawl_index WHERE link = "%s"', mysql_real_escape_string($link));
@@ -201,6 +206,7 @@ class Caterpillar extends RollingCurl {
 				return $res['id'];
 			}
 		}
+
 		return true;
 	}
 
@@ -217,16 +223,16 @@ class Caterpillar extends RollingCurl {
 	{
 		// the link doesnt exist in the db, insert now
 		$sql = sprintf('INSERT INTO crawl_index SET
-						link = "%1$s",
-						`count` = 1,
-						contenthash = "%2$s",
-						filesize = %3$d,
-						last_update = "%4$s",
-						last_tested = "%4$s"',
-						mysql_real_escape_string($url),
-						mysql_real_escape_string($this->_crc32($html)),
-						$filesize,
-						mysql_real_escape_string($this->startTime));
+				link = "%1$s",
+				`count` = 1,
+				contenthash = "%2$s",
+				filesize = %3$d,
+				last_update = "%4$s",
+				last_tested = "%4$s"',
+				mysql_real_escape_string($url),
+				mysql_real_escape_string($this->_crc32($html)),
+				$filesize,
+				mysql_real_escape_string($this->startTime));
 
 		mysql_query($sql, $this->db);
 		return mysql_insert_id();
