@@ -6,15 +6,47 @@ Because requests are handled in parallel, the fastest completed requests will tr
 
 ## Quick Installation ##
 
-1. Import the caterpillar.sql file into the database of your choice.
-2. Copy the library to your application and include.
-3. Modify the configuration file /caterpillar/inc/config.inc.php with your MySQL database login credentials.
-4. Your database user will need the privilege for creating and dropping TEMPORARY TABLES.
+1. Create a database of your liking and create a user with extended privileges for `CREATE TEMPORARY TABLES`.
+2. Import the `caterpillar.sql` file into the database of your choice.
+3. Copy the library to your application and include.
+4. Modify the configuration file /caterpillar/inc/config.inc.php with your MySQL database login credentials.
 5. Use the following example for usage:
 
-		<?php
-		require_once('caterpillar.php');
+    ```php
+    <?php
+	require_once('caterpillar.php');
+    
+    // database configuration params
+    $config = array(
+        'db_user' => 'your database user',
+        'db_pass' => 'your database user password',
+        'db_name' => 'the database name',
+        'db_host' => '127.0.01'
+    );
 
-		$caterpillar = new Caterpillar('http://www.url-to-crawl.org', $config['db_user'], $config['db_pass'], $config['db_name'], $config['db_host']);
-		$caterpillar->crawl();
-		?>
+    // instantiate the crawler
+	$caterpillar = new Caterpillar(
+	    'http://www.url-to-crawl.org', 
+	    $config['db_user'], 
+	    $config['db_pass'], 
+	    $config['db_name'], 
+	    $config['db_host']
+	);
+	
+    // begin crawling, results get stored in database
+	$caterpillar->crawl();
+    ```
+    
+## Where Are My Results? ##
+
+After crawling, your database results can be found in the table `crawl_index`. This table has the following structure:
+
+* **id**: A unique, auto-incrementing row identifier.
+* **link**: The page URL that was crawled.
+* **count**: The number of times the page url was encountered while crawling your site.
+* **filesize**: The size of the crawled file in bytes.
+* **contenthash**: A unique CRC32 hash of the file contents for determining if the file has been updated since last crawled.
+* **last_update**: A MySQL `DATE()` value of the last timestamp the page content has been added/updated/changed.
+* **last_tested**: A MySQL `DATE()` value of the last timestamp the page has been tested for content changes.
+
+You can easily utilize these results for a number of purposes, i.e. creating a weighted Google Sitemaps XML file based on inbound link popularity of pages.
