@@ -4,6 +4,10 @@ Caterpillar is a PHP library intended for website crawling and screen scraping. 
 
 Because requests are handled in parallel, the fastest completed requests will trigger enqueuing any newly found URLs, ensuring the crawler runs continuously and efficiently.  Rolling Curl is set to allow for a maximum number of simultaneous connections to ensure you do not DOS attack the requested host with requests.
 
+For more documentation, please visit the official site:
+
+[Caterpillar Official Website](https://www.coreyballou.com/projects/caterpillar-curl-multiget/)
+
 ## Quick Installation ##
 
 1. Create a database of your liking and create a user with extended privileges for `CREATE TEMPORARY TABLES`.
