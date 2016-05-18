@@ -54,7 +54,3 @@ After crawling, your database results can be found in the table `crawl_index`. T
 * **last_tested**: A MySQL `DATE()` value of the last timestamp the page has been tested for content changes.
 
 You can easily utilize these results for a number of purposes, i.e. creating a weighted Google Sitemaps XML file based on inbound link popularity of pages.
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/cballou/caterpillar/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
